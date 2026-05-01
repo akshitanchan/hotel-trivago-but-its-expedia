@@ -80,7 +80,7 @@ def _subsample_by_search_id(
     _validate_sample_frac(sample_frac)
     srch_ids = df["srch_id"].unique()
     rng = np.random.RandomState(random_state)
-    keep = rng.choice(srch_ids, size=int(len(srch_ids) * sample_frac), replace=False)
+    keep = rng.choice(srch_ids, size=max(1, int(len(srch_ids) * sample_frac)), replace=False)
     return df[df["srch_id"].isin(set(keep))].reset_index(drop=True)
 
 
@@ -238,7 +238,7 @@ def make_submission(
     df = df.copy()
     df["_neg_score"] = -df[score_col]
     df = df.sort_values(["srch_id", "_neg_score"])
-    sub = df[["srch_id", "prop_id"]].rename(columns={"srch_id": "SearchId", "prop_id": "PropertyId"})
+    sub = df[["srch_id", "prop_id"]]
     if output_path is not None:
         sub.to_csv(output_path, index=False)
     return sub
