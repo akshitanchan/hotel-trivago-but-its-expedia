@@ -1,0 +1,41 @@
+{
+  "model": "lambdarank",
+  "sample_frac": 0.15,
+  "n_rows": 742438,
+  "n_searches": 29969,
+  "n_train": 593717,
+  "n_val": 148721,
+  "n_features": 63,
+  "n_trees": 818,
+  "best_params": {
+    "objective": "lambdarank",
+    "metric": "ndcg",
+    "ndcg_eval_at": [5],
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.8,
+    "bagging_freq": 5,
+    "feature_pre_filter": false,
+    "num_leaves": 63,
+    "learning_rate": 0.01,
+    "min_child_samples": 100
+  },
+  "baseline_ndcg5": 0.1755,
+  "model_ndcg5": 0.382,
+  "top_features": {
+    "prop_location_score2": 36245.4,
+    "prop_location_score2_rank": 27285.3,
+    "price_vs_historical": 17443.7,
+    "price_usd_rank": 15071.5,
+    "prop_starrating_diff_mean": 14703.4,
+    "prop_starrating_rank": 14030.5,
+    "price_usd_diff_median": 13458.3,
+    "prop_id": 11891.7,
+    "prop_location_score2_max": 11850.5,
+    "price_usd_diff_mean": 10329.7,
+    "prop_location_score1": 9700.2,
+    "prop_location_score2_std": 9527.0,
+    "prop_review_score_rank": 9442.5,
+    "prop_location_score2_diff_mean": 9246.6,
+    "prop_review_score_diff_mean": 9240.0
+  }
+}
