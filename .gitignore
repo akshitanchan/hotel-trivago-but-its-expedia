@@ -224,3 +224,6 @@ data/
 
 # Model artifacts
 models/
+
+# Generated outputs
+outputs/
