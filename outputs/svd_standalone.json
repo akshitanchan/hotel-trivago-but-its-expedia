@@ -1,6 +1,0 @@
-{
-  "model": "svd_standalone",
-  "n_components": 20,
-  "ndcg5": 0.2196,
-  "baseline_ndcg5": 0.1727
-}
