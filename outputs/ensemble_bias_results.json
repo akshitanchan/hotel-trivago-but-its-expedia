@@ -1,0 +1,90 @@
+{
+  "ensemble": {
+    "best_alpha": 0.5,
+    "ndcg5": 0.4003,
+    "lambdarank_ndcg5": 0.3911,
+    "pointwise_ndcg5": 0.3982
+  },
+  "bias_investigation": {
+    "detection": {
+      "family_vs_nonfamily": {
+        "not_is_family": {
+          "ndcg5": 0.3942,
+          "n_searches": 30168,
+          "n_rows": 765540
+        },
+        "is_family": {
+          "ndcg5": 0.4189,
+          "n_searches": 9791,
+          "n_rows": 226125
+        }
+      },
+      "domestic_vs_international": {
+        "not_is_domestic": {
+          "ndcg5": 0.3845,
+          "n_searches": 14810,
+          "n_rows": 362204
+        },
+        "is_domestic": {
+          "ndcg5": 0.4086,
+          "n_searches": 25217,
+          "n_rows": 629461
+        }
+      },
+      "family_recall_at_5": {
+        "0": {
+          "recall_at_5": 0.6091,
+          "n_bookings": 20762
+        },
+        "1": {
+          "recall_at_5": 0.6328,
+          "n_bookings": 6767
+        }
+      },
+      "domestic_recall_at_5": {
+        "0": {
+          "recall_at_5": 0.5999,
+          "n_bookings": 9558
+        },
+        "1": {
+          "recall_at_5": 0.6229,
+          "n_bookings": 17971
+        }
+      }
+    },
+    "mitigation": {
+      "technique": "post-processing score boost",
+      "group": "domestic_vs_international",
+      "boosted_group": "international",
+      "boost": 0.0,
+      "original_overall_ndcg5": 0.4003,
+      "mitigated_overall_ndcg5": 0.4003,
+      "mitigated_group_ndcg5": {
+        "not_is_domestic": {
+          "ndcg5": 0.3845,
+          "n_searches": 14810,
+          "n_rows": 362204
+        },
+        "is_domestic": {
+          "ndcg5": 0.4086,
+          "n_searches": 25217,
+          "n_rows": 629461
+        }
+      },
+      "mitigated_recall_at_5": {
+        "0": {
+          "recall_at_5": 0.5999,
+          "n_bookings": 9558
+        },
+        "1": {
+          "recall_at_5": 0.6229,
+          "n_bookings": 17971
+        }
+      }
+    }
+  },
+  "artifacts": {
+    "lambdarank": "outputs/lambdarank_val_preds.parquet",
+    "pointwise": "outputs/pointwise_val_preds.parquet"
+  }
+}
