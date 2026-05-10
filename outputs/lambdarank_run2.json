@@ -1,0 +1,49 @@
+{
+  "model": "lambdarank",
+  "use_sample": false,
+  "sample_frac": null,
+  "n_rows": 4958347,
+  "n_searches": 199795,
+  "n_train": 3966682,
+  "n_val": 991665,
+  "n_features": 137,
+  "n_trees": 991,
+  "best_params": {
+    "objective": "lambdarank",
+    "metric": "ndcg",
+    "ndcg_eval_at": [
+      5
+    ],
+    "num_leaves": 511,
+    "learning_rate": 0.01,
+    "min_child_samples": 200,
+    "lambda_l1": 0.1,
+    "lambda_l2": 1.0,
+    "min_gain_to_split": 0.01,
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.8,
+    "bagging_freq": 5,
+    "feature_pre_filter": false,
+    "device": "gpu",
+    "gpu_use_dp": false
+  },
+  "baseline_ndcg5": 0.1727,
+  "model_ndcg5": 0.3944,
+  "top_features": {
+    "hotel_ctr_unbiased": 279558.0,
+    "prop_location_score2_rank": 163840.8,
+    "svd_affinity_score": 107775.2,
+    "price_vs_historical": 103542.1,
+    "prop_location_score2": 97710.2,
+    "price_usd_rank": 86663.1,
+    "score1d2_liu": 67813.2,
+    "hotel_book_rate_by_country": 66784.4,
+    "prop_id_count": 62164.0,
+    "price_usd_diff_median": 60985.1,
+    "prop_starrating_diff_mean": 58225.3,
+    "prop_location_score2_diff_mean": 58030.3,
+    "dest_hotel_affinity": 56718.3,
+    "prop_starrating_rank": 56711.2,
+    "hotel_book_rate_by_dest": 49060.2
+  }
+}

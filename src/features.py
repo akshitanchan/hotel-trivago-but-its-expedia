@@ -53,14 +53,10 @@ def add_price_features(df: pd.DataFrame) -> pd.DataFrame:
 
     df["is_deal"] = (df["price_vs_historical"] < 1).astype("int8")
 
-    df["ump"] = (
-        df["price_usd"] * df["srch_room_count"] / (hist_price + 1)
-    ).astype("float32")
+    df["ump"] = (hist_price - df["price_usd"]).astype("float32")
 
-    df["per_fee"] = (
-        df["price_usd"]
-        / (df["srch_room_count"] * df["srch_length_of_stay"] + 1)
-    ).astype("float32")
+    denom = (df["srch_adults_count"] + df["srch_children_count"]).clip(lower=1)
+    df["per_fee"] = (df["price_usd"] * df["srch_room_count"] / denom).astype("float32")
 
     return df
 
@@ -140,7 +136,17 @@ def add_liu_count_features(df: pd.DataFrame) -> pd.DataFrame:
     df["score1d2"] = (
         df["prop_location_score1"] / (df["prop_location_score2"].fillna(0) + 1)
     ).astype("float32")
- 
+
+    # Liu et al. formulas (kept alongside existing variants — let the model decide)
+    df["score1d2_liu"] = (
+        (df["prop_location_score2"].fillna(0) + 0.0001)
+        / (df["prop_location_score1"] + 0.0001)
+    ).astype("float32")
+
+    df["score2ma_liu"] = (
+        df["prop_location_score2"].fillna(0) * df["srch_query_affinity_score"].fillna(0)
+    ).astype("float32")
+
     # How often this hotel appears in the dataset (popularity proxy)
     prop_counts = df["prop_id"].map(df["prop_id"].value_counts())
     df["prop_id_count"] = prop_counts.astype("int32")
@@ -160,4 +166,19 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     df = add_missing_indicators(df)
     df = add_temporal_features(df)
     df = add_liu_count_features(df)
+    return df
+
+
+def impute_score2(df: pd.DataFrame, train_df: pd.DataFrame) -> pd.DataFrame:
+    """Impute missing prop_location_score2 with Q1 by prop_country_id.
+
+    Fill values computed from train_df only (leakage-safe).
+    The prop_location_score2_missing indicator is NOT removed — the tree
+    can still split on it independently.
+    """
+    col = "prop_location_score2"
+    fill_map = train_df.groupby("prop_country_id")[col].quantile(0.25)
+    global_fill = train_df[col].quantile(0.25)
+    df[col] = df[col].fillna(df["prop_country_id"].map(fill_map))
+    df[col] = df[col].fillna(global_fill)
     return df

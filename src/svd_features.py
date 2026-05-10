@@ -17,11 +17,12 @@ def build_svd_features(
     Leakage-safe: only train_fold_df rows with random_bool=1 are used to
     build the interaction matrix, so validation targets never leak.
 
-    Returns full_df with 43 new columns:
+    Returns full_df with 44 new columns:
       - 20 destination factors (svd_dest_f0..f19)
       - 20 hotel factors (svd_hotel_f0..f19)
       - 1 affinity score (svd_affinity_score)
-      - 2 item-based CF signals (hotel_book_rate_by_site, hotel_book_rate_by_country)
+      - 3 item-based CF signals (hotel_book_rate_by_site, hotel_book_rate_by_country,
+        hotel_book_rate_by_dest)
     """
     full_df = full_df.copy()
 
@@ -88,41 +89,47 @@ def build_svd_features(
 
     # --- Step 8: Item-based CF signals ---
     global_book_rate = random_train["booking_bool"].mean()
+    m = 30  # Bayesian smoothing prior
 
-    # Per (hotel, site) booking rate
-    hotel_site_rate = (
-        random_train.groupby(["prop_id", "site_id"])["booking_bool"]
-        .mean()
-        .rename("hotel_book_rate_by_site")
-    )
+    # Per (hotel, site) booking rate — with Bayesian smoothing
+    hs_agg = random_train.groupby(["prop_id", "site_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
+    hs_agg["hotel_book_rate_by_site"] = (
+        (hs_agg["sum"] + m * global_book_rate) / (hs_agg["count"] + m)
+    ).astype("float32")
+    hs_map = hs_agg.set_index(["prop_id", "site_id"])["hotel_book_rate_by_site"]
     full_df = full_df.merge(
-        hotel_site_rate, left_on=["prop_id", "site_id"], right_index=True, how="left"
+        hs_map, left_on=["prop_id", "site_id"], right_index=True, how="left"
     )
-    full_df["hotel_book_rate_by_site"] = full_df["hotel_book_rate_by_site"].fillna(
-        global_book_rate
-    )
+    full_df["hotel_book_rate_by_site"] = full_df["hotel_book_rate_by_site"].fillna(global_book_rate)
 
-    # Per (hotel, visitor_country) booking rate
-    hotel_country_rate = (
-        random_train.groupby(["prop_id", "visitor_location_country_id"])["booking_bool"]
-        .mean()
-        .rename("hotel_book_rate_by_country")
-    )
+    # Per (hotel, visitor_country) booking rate — with Bayesian smoothing
+    hc_agg = random_train.groupby(["prop_id", "visitor_location_country_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
+    hc_agg["hotel_book_rate_by_country"] = (
+        (hc_agg["sum"] + m * global_book_rate) / (hc_agg["count"] + m)
+    ).astype("float32")
+    hc_map = hc_agg.set_index(["prop_id", "visitor_location_country_id"])["hotel_book_rate_by_country"]
     full_df = full_df.merge(
-        hotel_country_rate,
-        left_on=["prop_id", "visitor_location_country_id"],
-        right_index=True,
-        how="left",
+        hc_map, left_on=["prop_id", "visitor_location_country_id"], right_index=True, how="left"
     )
-    full_df["hotel_book_rate_by_country"] = full_df[
-        "hotel_book_rate_by_country"
-    ].fillna(global_book_rate)
+    full_df["hotel_book_rate_by_country"] = full_df["hotel_book_rate_by_country"].fillna(global_book_rate)
+
+    # Per (hotel, destination) booking rate — new feature with Bayesian smoothing
+    hd_agg = random_train.groupby(["prop_id", "srch_destination_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
+    hd_agg["hotel_book_rate_by_dest"] = (
+        (hd_agg["sum"] + m * global_book_rate) / (hd_agg["count"] + m)
+    ).astype("float32")
+    hd_map = hd_agg.set_index(["prop_id", "srch_destination_id"])["hotel_book_rate_by_dest"]
+    full_df = full_df.merge(
+        hd_map, left_on=["prop_id", "srch_destination_id"], right_index=True, how="left"
+    )
+    full_df["hotel_book_rate_by_dest"] = full_df["hotel_book_rate_by_dest"].fillna(global_book_rate)
 
     # --- Step 9: Cast to float32 ---
     svd_columns = dest_cols + hotel_cols + [
         "svd_affinity_score",
         "hotel_book_rate_by_site",
         "hotel_book_rate_by_country",
+        "hotel_book_rate_by_dest",
     ]
     for col in svd_columns:
         full_df[col] = full_df[col].astype("float32")
