@@ -238,9 +238,7 @@ def make_submission(
     df = df.copy()
     df["_neg_score"] = -df[score_col]
     df = df.sort_values(["srch_id", "_neg_score"])
-    sub = df[["srch_id", "prop_id"]].rename(
-        columns={"srch_id": "SearchId", "prop_id": "PropertyId"}
-    )
+    sub = df[["srch_id", "prop_id"]]
     if output_path is not None:
         sub.to_csv(output_path, index=False)
     return sub
