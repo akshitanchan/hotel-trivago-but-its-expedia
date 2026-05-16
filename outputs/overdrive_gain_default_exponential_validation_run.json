@@ -1,0 +1,246 @@
+{
+  "use_sample": false,
+  "sample_frac": null,
+  "n_train": 3966682,
+  "n_val": 991665,
+  "n_features": 236,
+  "n_meta_routing_features": 34,
+  "validation_tag": "overdrive_gain_default_exponential",
+  "gain_policy": "default_exponential",
+  "candidate_score_cols": [
+    "pw_score",
+    "click_score",
+    "lr_score",
+    "xendcg_score"
+  ],
+  "score_cols": [
+    "pw_score",
+    "click_score",
+    "lr_score",
+    "xendcg_score"
+  ],
+  "candidate_base_scores": {
+    "pw_score": 0.4107794725661377,
+    "click_score": 0.40524188985960186,
+    "lr_score": 0.40997736922209815,
+    "xendcg_score": 0.41444727429994654
+  },
+  "base_scores": {
+    "pw_score": 0.4107794725661377,
+    "click_score": 0.40524188985960186,
+    "lr_score": 0.40997736922209815,
+    "xendcg_score": 0.41444727429994654
+  },
+  "lomo_diagnostics": {
+    "click_score": {
+      "signed_oof_with_model": 0.41598632749141223,
+      "signed_oof_without_model": 0.4156977930612927,
+      "delta_when_removed": -0.00028853443011955804,
+      "kept": true
+    },
+    "lr_score": {
+      "signed_oof_with_model": 0.41598632749141223,
+      "signed_oof_without_model": 0.41454152422684676,
+      "delta_when_removed": -0.0014448032645654751,
+      "kept": true
+    }
+  },
+  "rrf_ndcg5": 0.41589267972230876,
+  "opt_z_ndcg5_in_sample": 0.415755455148895,
+  "opt_z_ndcg5_oof": 0.4158238618181408,
+  "opt_z_weights": {
+    "pw_score": 0.19996683698220033,
+    "click_score": 0.25425436791570527,
+    "lr_score": 0.31326312505201254,
+    "xendcg_score": 0.23251567005008175
+  },
+  "opt_mm_ndcg5_in_sample": 0.4157373286052573,
+  "opt_mm_ndcg5_oof": 0.41541701541071097,
+  "opt_mm_weights": {
+    "pw_score": 0.24081527246616488,
+    "click_score": 0.24032079595287226,
+    "lr_score": 0.2618670847862743,
+    "xendcg_score": 0.2569968467946884
+  },
+  "signed_z_ndcg5_in_sample": 0.41627441750910515,
+  "signed_z_ndcg5_oof": 0.41598632749141223,
+  "signed_z_weights": {
+    "pw_score": 0.3173025103134068,
+    "click_score": 0.06360712302513663,
+    "lr_score": 0.25855538072771467,
+    "xendcg_score": 0.3605349859337419
+  },
+  "ensemble_scores_in_sample": {
+    "rrf_score": 0.41589267972230876,
+    "opt_z_blend": 0.415755455148895,
+    "opt_mm_blend": 0.4157373286052573,
+    "signed_z_blend": 0.41627441750910515
+  },
+  "blend_oof_scores": {
+    "opt_z_blend": 0.4158238618181408,
+    "opt_mm_blend": 0.41541701541071097,
+    "signed_z_blend": 0.41598632749141223
+  },
+  "selector_scores": {
+    "signed_z_blend": 0.41598632749141223
+  },
+  "meta_oof_ndcg5": 0.41760728254940777,
+  "meta_full_rounds": 89,
+  "meta_fold_scores": [
+    0.4156151402948914,
+    0.41700828384005456,
+    0.42538102227191316,
+    0.4083783501076178,
+    0.42165412259392876
+  ],
+  "meta_fold_std": 0.0057672969023464735,
+  "meta_fold_min": 0.4083783501076178,
+  "meta_advantage_over_signed": 0.0016209550579955323,
+  "meta_is_stable": false,
+  "meta_feature_cols": [
+    "pw_score_z",
+    "pw_score_mm",
+    "pw_score_rank",
+    "click_score_z",
+    "click_score_mm",
+    "click_score_rank",
+    "lr_score_z",
+    "lr_score_mm",
+    "lr_score_rank",
+    "xendcg_score_z",
+    "xendcg_score_mm",
+    "xendcg_score_rank",
+    "search_hotel_count",
+    "search_price_cv",
+    "search_price_std",
+    "search_brand_frac",
+    "search_mean_star",
+    "star_diff_from_search_mean",
+    "search_promo_frac",
+    "price_usd_rank",
+    "price_rank_per_star",
+    "price_z_in_tier",
+    "price_vs_tier_median",
+    "price_z_in_search",
+    "prop_quality_score_rank",
+    "srch_query_affinity_score_rank",
+    "is_domestic",
+    "is_family",
+    "is_last_minute",
+    "is_advance_purchase",
+    "is_leisure_search",
+    "last_minute_x_price_rank",
+    "window_x_deal",
+    "comp_advantage_score",
+    "comp_advantage_rank",
+    "comp_no_inventory_frac",
+    "dest_star_book_rate_unbiased",
+    "dest_star_ctr_unbiased",
+    "dest_star_click_only_rate_unbiased",
+    "hotel_ctr_by_window_unbiased",
+    "hotel_book_rate_by_window_unbiased",
+    "hotel_click_only_rate_by_window_unbiased",
+    "svd_affinity_score",
+    "hotel_book_rate_unbiased",
+    "hotel_ctr_unbiased",
+    "dest_hotel_affinity"
+  ],
+  "best_ensemble_col": "signed_z_blend",
+  "secondary_ensemble_col": null,
+  "best_ensemble_ndcg5": 0.41598632749141223,
+  "passes_submission_gate": true,
+  "submission_recommendation": "submit_signed_z_only",
+  "prop_prior_diagnostics": {
+    "prop_id_book_rate_oof": {
+      "train_oof_mean": 0.02795020490884781,
+      "validation_mapped_mean": 0.027962245047092438,
+      "abs_diff": 1.2040138244628906e-05
+    },
+    "prop_id_click_rate_oof": {
+      "train_oof_mean": 0.0444483608007431,
+      "validation_mapped_mean": 0.044453345239162445,
+      "abs_diff": 4.984438419342041e-06
+    },
+    "prop_id_click_only_rate_oof": {
+      "train_oof_mean": 0.016498155891895294,
+      "validation_mapped_mean": 0.016491102054715157,
+      "abs_diff": 7.053837180137634e-06
+    }
+  },
+  "rank_correlation": {
+    "pw_score": {
+      "pw_score": 1.0,
+      "click_score": 0.900243,
+      "lr_score": 0.830759,
+      "xendcg_score": 0.777689,
+      "signed_z_blend": 0.843179,
+      "meta_oof_score": 0.780192
+    },
+    "click_score": {
+      "pw_score": 0.900243,
+      "click_score": 1.0,
+      "lr_score": 0.882171,
+      "xendcg_score": 0.797887,
+      "signed_z_blend": 0.86034,
+      "meta_oof_score": 0.774536
+    },
+    "lr_score": {
+      "pw_score": 0.830759,
+      "click_score": 0.882171,
+      "lr_score": 1.0,
+      "xendcg_score": 0.912537,
+      "signed_z_blend": 0.854667,
+      "meta_oof_score": 0.760404
+    },
+    "xendcg_score": {
+      "pw_score": 0.777689,
+      "click_score": 0.797887,
+      "lr_score": 0.912537,
+      "xendcg_score": 1.0,
+      "signed_z_blend": 0.851398,
+      "meta_oof_score": 0.779161
+    },
+    "signed_z_blend": {
+      "pw_score": 0.843179,
+      "click_score": 0.86034,
+      "lr_score": 0.854667,
+      "xendcg_score": 0.851398,
+      "signed_z_blend": 1.0,
+      "meta_oof_score": 0.848351
+    },
+    "meta_oof_score": {
+      "pw_score": 0.780192,
+      "click_score": 0.774536,
+      "lr_score": 0.760404,
+      "xendcg_score": 0.779161,
+      "signed_z_blend": 0.848351,
+      "meta_oof_score": 1.0
+    }
+  },
+  "top5_overlap_diagnostics": {
+    "meta_vs_signed_z": 0.944192797617558
+  },
+  "segment_diagnostics": {
+    "signed_z_blend": {
+      "is_domestic=0": 0.4014020484705864,
+      "is_domestic=1": 0.42500351766876626,
+      "is_family=0": 0.41043420548636717,
+      "is_family=1": 0.4342692613761216,
+      "is_last_minute=0": 0.413426672230627,
+      "is_last_minute=1": 0.4349295168229753,
+      "is_advance_purchase=0": 0.4231061635682899,
+      "is_advance_purchase=1": 0.40453669613213167,
+      "is_leisure_search=0": 0.429131562975985,
+      "is_leisure_search=1": 0.4114285659837707
+    }
+  },
+  "best_iterations": {
+    "pointwise": 2852,
+    "click": 987,
+    "click_only": null,
+    "lambdarank": 1541,
+    "rank_xendcg": 2527,
+    "unbiased_rank_xendcg": null,
+    "catboost": null
+  }
+}

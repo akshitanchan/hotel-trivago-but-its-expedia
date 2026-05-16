@@ -224,3 +224,7 @@ data/
 
 # Model artifacts
 models/
+outputs/*.parquet
+
+# Large binary artifacts
+*.parquet

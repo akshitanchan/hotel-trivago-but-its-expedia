@@ -38,7 +38,11 @@ def build_svd_features(
         )
         .reset_index()
     )
-    interactions["score"] = 5 * interactions["bookings"] + interactions["clicks"]
+    # Bookings are also clicks in this dataset. Match Kaggle relevance:
+    # booking=5, click-only=1, no action=0.
+    interactions["score"] = 5 * interactions["bookings"] + (
+        interactions["clicks"] - interactions["bookings"]
+    )
 
     dest_cat = pd.Categorical(interactions["srch_destination_id"])
     prop_cat = pd.Categorical(interactions["prop_id"])
