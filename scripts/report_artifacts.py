@@ -216,21 +216,18 @@ except ImportError:
     print("LightGBM not installed. Skipping feature importance plot.")
     sys.exit(0)
 
-from src.features import build_features, impute_score2
 from src.final_pipeline import (
-    build_base_feature_frame,
+    build_validation_feature_frames,
     get_feature_cols,
     make_relevance,
     sort_for_group_model,
 )
-from src.position_features import build_position_features
-from src.svd_features import build_svd_features
 
 print("Building features on 15% sample...")
 train_sub, val_sub = train_val_split(train_df, test_size=0.2, random_state=RANDOM_STATE)
 
 count_ref = train_sub[["prop_id", "srch_destination_id"]]
-train_feat = build_base_feature_frame(train_sub, train_sub, count_reference_frame=count_ref, svd_components=20)
+train_feat, _ = build_validation_feature_frames(train_sub, val_sub, count_reference_frame=count_ref, svd_components=20)
 del val_sub, count_ref
 gc.collect()
 
