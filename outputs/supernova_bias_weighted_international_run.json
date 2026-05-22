@@ -1,0 +1,85 @@
+{
+  "diagnostic_tag": "supernova_bias_weighted_international",
+  "baseline_source": "/home/akshitanchan/Projects/hotel-trivago-but-its-expedia/outputs/supernova_validation_predictions.parquet",
+  "feature_count": 273,
+  "row_count": 991665,
+  "search_count": 39959,
+  "mixed_domestic_queries": {
+    "count": 68,
+    "fraction": 0.0017017442878950926
+  },
+  "summary": [
+    {
+      "name": "unweighted_seed42_rankxendcg",
+      "international_query_weight": 1.0,
+      "overall_ndcg5": 0.41815315145764154,
+      "overall_recall5": 0.5769758599743526,
+      "international_ndcg5": 0.40595739398981184,
+      "domestic_ndcg5": 0.4253112570818296,
+      "international_recall5": 0.5597265531302471,
+      "domestic_recall5": 0.5873330212796601,
+      "domestic_international_epr": 0.954494825213869
+    },
+    {
+      "name": "xendcg_int_query_weight_1p7",
+      "international_query_weight": 1.7,
+      "overall_ndcg5": 0.41673453133242216,
+      "overall_recall5": 0.5761884406848298,
+      "international_ndcg5": 0.4044266556868988,
+      "domestic_ndcg5": 0.4239584429354877,
+      "international_recall5": 0.5593667546174143,
+      "domestic_recall5": 0.5862888416807691,
+      "domestic_international_epr": 0.9539299486210233
+    }
+  ],
+  "baseline_metrics": {
+    "score_col": "xendcg_s42_score",
+    "overall": {
+      "ndcg5": 0.41815315145764154,
+      "recall5": 0.5769758599743526,
+      "n_searches": 39959,
+      "n_rows": 991665
+    },
+    "is_domestic": {
+      "is_domestic=0": {
+        "ndcg5": 0.40595739398981184,
+        "recall5": 0.5597265531302471,
+        "n_searches": 14779,
+        "n_rows": 362188
+      },
+      "is_domestic=1": {
+        "ndcg5": 0.4253112570818296,
+        "recall5": 0.5873330212796601,
+        "n_searches": 25180,
+        "n_rows": 629477
+      }
+    },
+    "is_domestic_epr": 0.954494825213869
+  },
+  "weighted_metrics": {
+    "xendcg_int_query_weight_1p7": {
+      "score_col": "xendcg_int_query_weight_1p7",
+      "overall": {
+        "ndcg5": 0.41673453133242216,
+        "recall5": 0.5761884406848298,
+        "n_searches": 39959,
+        "n_rows": 991665
+      },
+      "is_domestic": {
+        "is_domestic=0": {
+          "ndcg5": 0.4044266556868988,
+          "recall5": 0.5593667546174143,
+          "n_searches": 14779,
+          "n_rows": 362188
+        },
+        "is_domestic=1": {
+          "ndcg5": 0.4239584429354877,
+          "recall5": 0.5862888416807691,
+          "n_searches": 25180,
+          "n_rows": 629477
+        }
+      },
+      "is_domestic_epr": 0.9539299486210233
+    }
+  }
+}
