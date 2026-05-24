@@ -1,0 +1,85 @@
+{
+  "score_col": "signed_z_blend",
+  "predictions": "outputs/supernova_validation_predictions.parquet",
+  "detection": {
+    "overall": {
+      "ndcg5": 0.4201578069845845,
+      "recall5": 0.5789331593511665,
+      "n_searches": 39959,
+      "n_rows": 991665
+    },
+    "is_domestic": {
+      "is_domestic=0": {
+        "ndcg5": 0.40691453667104127,
+        "recall5": 0.5620652434636604,
+        "n_searches": 14779,
+        "n_rows": 362188
+      },
+      "is_domestic=1": {
+        "ndcg5": 0.4279307335915685,
+        "recall5": 0.58906131854679,
+        "n_searches": 25180,
+        "n_rows": 629477
+      }
+    },
+    "is_family": {
+      "is_family=0": {
+        "ndcg5": 0.41491393216375944,
+        "recall5": 0.5725564690866997,
+        "n_searches": 30168,
+        "n_rows": 765540
+      },
+      "is_family=1": {
+        "ndcg5": 0.4363152184435419,
+        "recall5": 0.5989031418479271,
+        "n_searches": 9791,
+        "n_rows": 226125
+      }
+    },
+    "is_domestic_epr": 0.9508887881360122,
+    "is_family_epr": 0.9509499431256907
+  },
+  "post_processing": {
+    "boost": 0.02,
+    "mixed_domestic_queries": {
+      "count": 68,
+      "fraction": 0.0017017442878950926
+    },
+    "before": {
+      "overall_ndcg5": 0.4201578069845845,
+      "overall_recall5": 0.5789331593511665,
+      "is_domestic": {
+        "is_domestic=0": {
+          "ndcg5": 0.40691453667104127,
+          "recall5": 0.5620652434636604,
+          "n_searches": 14779,
+          "n_rows": 362188
+        },
+        "is_domestic=1": {
+          "ndcg5": 0.4279307335915685,
+          "recall5": 0.58906131854679,
+          "n_searches": 25180,
+          "n_rows": 629477
+        }
+      }
+    },
+    "after": {
+      "overall_ndcg5": 0.4201578069845845,
+      "overall_recall5": 0.5789331593511665,
+      "is_domestic": {
+        "is_domestic=0": {
+          "ndcg5": 0.40691453667104127,
+          "recall5": 0.5620652434636604,
+          "n_searches": 14779,
+          "n_rows": 362188
+        },
+        "is_domestic=1": {
+          "ndcg5": 0.4279307335915685,
+          "recall5": 0.58906131854679,
+          "n_searches": 25180,
+          "n_rows": 629477
+        }
+      }
+    }
+  }
+}
