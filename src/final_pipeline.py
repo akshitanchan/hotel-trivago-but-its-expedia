@@ -38,7 +38,7 @@ COMP_RAW = [
     for suffix in ("rate", "inv", "rate_percent_diff")
 ]
 
-# Confirmed low/zero-gain drop from the boost experiments.
+# Indicator features dropped after earlier experiments showed no gain.
 T3B_DROP = [
     "visitor_hist_starrating_missing",
     "prop_review_score_missing",
@@ -82,7 +82,7 @@ PROP_ID_PRIOR_COLS = [
 
 
 def make_relevance(frame: pd.DataFrame) -> np.ndarray:
-    """Kaggle relevance: booking=5, click-only=1, no action=0."""
+    """Kaggle relevance, with booking 5, click only 1 and no action 0."""
     return (
         frame["booking_bool"] * 5
         + (frame["click_bool"] - frame["booking_bool"]).clip(lower=0)
@@ -274,7 +274,7 @@ def add_search_context_features(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_final_direct_features(frame: pd.DataFrame) -> pd.DataFrame:
-    """Non-target direct features from the Shockwave plan."""
+    """Non-target direct features computed within each search."""
     guests = (frame["srch_adults_count"] + frame["srch_children_count"]).clip(lower=1)
     nights = frame["srch_length_of_stay"].clip(lower=1)
     price = frame["price_usd"].clip(lower=1.0)
@@ -756,7 +756,7 @@ def build_validation_feature_frames(
     count_reference_frame: pd.DataFrame,
     svd_components: int = 20,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Leakage-safe validation features: target-derived maps fitted from train only."""
+    """Leakage-safe validation features with target-derived maps fitted on train only."""
     train_df = build_base_feature_frame(
         train_raw,
         impute_fit_frame=train_raw,

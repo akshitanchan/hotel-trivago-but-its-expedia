@@ -120,8 +120,8 @@ def build_train_sample_cache(
     """
     Cache a sampled training dataframe locally for faster reruns.
 
-    The initial cache build still reads the full CSV once; later loads reuse the
-    cached subset via pandas pickle.
+    The first call still reads the full CSV once. Later calls reuse the cached
+    subset, which is stored as a pandas pickle.
     """
     cache_path = Path(output_path) if output_path is not None else get_train_sample_cache_path(
         sample_frac=sample_frac,
@@ -185,8 +185,8 @@ def compute_ndcg(
     """
     Compute mean NDCG@k across all searches (loop version).
 
-    df must contain srch_id, booking_bool, click_bool (unless relevance_col given).
-    score_col: column with predicted scores (higher = better).
+    df must contain srch_id, booking_bool and click_bool, unless relevance_col
+    is given. score_col names the column of predicted scores (higher is better).
     """
     if relevance_col is None:
         rel = df["booking_bool"] * 5 + (df["click_bool"] - df["booking_bool"]).clip(lower=0)
@@ -206,7 +206,7 @@ def compute_ndcg_fast(
     score_col: str,
     k: int = 5,
 ) -> float:
-    """Vectorised NDCG@k, faster version for large datasets."""
+    """Vectorised NDCG@k for large datasets."""
     df = df.copy()
     df["_rel"] = df["booking_bool"] * 5 + (df["click_bool"] - df["booking_bool"]).clip(lower=0)
     df["_neg_score"] = -df[score_col]

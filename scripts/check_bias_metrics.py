@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Recompute Section 8 bias and mitigation metrics from validation predictions.
+"""Recompute bias metrics for the Supernova validation predictions.
 
-Run this on the host where the final validation predictions parquet exists.
-The script does not train anything. It only loads predictions, reconstructs
-the signed z-score blend if needed, merges validation labels/segments if needed,
-and prints the exact values used in report Section 8.1 to 8.3.
+Run this where the final validation predictions parquet exists. The script
+does not train anything. It loads the predictions, rebuilds the signed z-score
+blend if it is missing, and merges validation labels and segment columns if
+they are missing. It then reports NDCG@5 and Recall@5 for domestic versus
+international searches and for family versus non-family searches, plus the
+effect of a constant score boost for international hotels.
 """
 
 from __future__ import annotations
@@ -175,7 +177,7 @@ def main() -> None:
     parser.add_argument("--boost", type=float, default=0.02)
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--random-state", type=int, default=42)
-    parser.add_argument("--out", default=None, help="Optional JSON output path.")
+    parser.add_argument("--out", default="outputs/bias_metrics_check.json", help="JSON output path.")
     args = parser.parse_args()
 
     predictions_path = Path(args.predictions)
@@ -243,7 +245,7 @@ def main() -> None:
     }
 
     print(json.dumps(result, indent=2))
-    print("\nReport-ready rounded values:")
+    print("\nRounded values:")
     dom = detection["is_domestic"]
     fam = detection["is_family"]
     print(

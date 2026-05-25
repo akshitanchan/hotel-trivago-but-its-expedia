@@ -14,10 +14,10 @@ def build_svd_features(
     Compute SVD latent factors from unbiased training-fold rows and merge
     them as features onto full_df.
 
-    Leakage-safe: only train_fold_df rows with random_bool=1 are used to
-    build the interaction matrix, so validation targets never leak.
+    Only train_fold_df rows with random_bool=1 are used to build the
+    interaction matrix, so validation targets never reach the features.
 
-    Returns full_df with 44 new columns:
+    Returns full_df with 44 new columns, listed below.
       - 20 destination factors (svd_dest_f0..f19)
       - 20 hotel factors (svd_hotel_f0..f19)
       - 1 affinity score (svd_affinity_score)
@@ -26,10 +26,10 @@ def build_svd_features(
     """
     full_df = full_df.copy()
 
-    # --- Step 1: Filter to unbiased training rows ---
+    # Keep only unbiased (randomly ordered) training rows
     random_train = train_fold_df[train_fold_df["random_bool"] == 1]
 
-    # --- Step 2: Build interaction matrix ---
+    # Destination x hotel interaction matrix
     interactions = (
         random_train.groupby(["srch_destination_id", "prop_id"])
         .agg(
@@ -38,8 +38,8 @@ def build_svd_features(
         )
         .reset_index()
     )
-    # Bookings are also clicks in this dataset. Match Kaggle relevance:
-    # booking=5, click-only=1, no action=0.
+    # Every booking is also a click. Score follows the Kaggle relevance
+    # (booking 5, click only 1, no action 0).
     interactions["score"] = 5 * interactions["bookings"] + (
         interactions["clicks"] - interactions["bookings"]
     )
@@ -52,12 +52,12 @@ def build_svd_features(
         shape=(len(dest_cat.categories), len(prop_cat.categories)),
     )
 
-    # --- Step 3: Apply TruncatedSVD ---
+    # Factorize the matrix
     svd = TruncatedSVD(n_components=n_components, random_state=random_state)
     dest_factors = svd.fit_transform(sparse_matrix)
     hotel_factors = svd.components_.T
 
-    # --- Step 4: Build lookup DataFrames ---
+    # Lookup tables of factors by destination and hotel
     dest_cols = [f"svd_dest_f{i}" for i in range(n_components)]
     hotel_cols = [f"svd_hotel_f{i}" for i in range(n_components)]
 
@@ -68,11 +68,11 @@ def build_svd_features(
         hotel_factors, index=prop_cat.categories, columns=hotel_cols
     )
 
-    # --- Step 5: Cold-start defaults ---
+    # Mean factors used for unseen destinations and hotels
     default_dest = dest_factors.mean(axis=0)
     default_hotel = hotel_factors.mean(axis=0)
 
-    # --- Step 6: Merge onto full_df ---
+    # Merge the factors onto full_df
     full_df = full_df.merge(
         dest_factors_df, left_on="srch_destination_id", right_index=True, how="left"
     )
@@ -80,22 +80,22 @@ def build_svd_features(
         hotel_factors_df, left_on="prop_id", right_index=True, how="left"
     )
 
-    # Fill cold-start with defaults
+    # Fill unseen keys with the mean factors
     for i, col in enumerate(dest_cols):
         full_df[col] = full_df[col].fillna(default_dest[i])
     for i, col in enumerate(hotel_cols):
         full_df[col] = full_df[col].fillna(default_hotel[i])
 
-    # --- Step 7: Compute affinity score (dot product) ---
+    # Affinity score as the dot product of the two factor vectors
     dest_vals = full_df[dest_cols].values
     hotel_vals = full_df[hotel_cols].values
     full_df["svd_affinity_score"] = (dest_vals * hotel_vals).sum(axis=1)
 
-    # --- Step 8: Item-based CF signals ---
+    # Smoothed booking rates by hotel and context
     global_book_rate = random_train["booking_bool"].mean()
-    m = 30  # Bayesian smoothing prior
+    m = 30  # smoothing strength
 
-    # Per (hotel, site) booking rate — with Bayesian smoothing
+    # Per (hotel, site) booking rate
     hs_agg = random_train.groupby(["prop_id", "site_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
     hs_agg["hotel_book_rate_by_site"] = (
         (hs_agg["sum"] + m * global_book_rate) / (hs_agg["count"] + m)
@@ -106,7 +106,7 @@ def build_svd_features(
     )
     full_df["hotel_book_rate_by_site"] = full_df["hotel_book_rate_by_site"].fillna(global_book_rate)
 
-    # Per (hotel, visitor_country) booking rate — with Bayesian smoothing
+    # Per (hotel, visitor country) booking rate
     hc_agg = random_train.groupby(["prop_id", "visitor_location_country_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
     hc_agg["hotel_book_rate_by_country"] = (
         (hc_agg["sum"] + m * global_book_rate) / (hc_agg["count"] + m)
@@ -117,7 +117,7 @@ def build_svd_features(
     )
     full_df["hotel_book_rate_by_country"] = full_df["hotel_book_rate_by_country"].fillna(global_book_rate)
 
-    # Per (hotel, destination) booking rate — new feature with Bayesian smoothing
+    # Per (hotel, destination) booking rate
     hd_agg = random_train.groupby(["prop_id", "srch_destination_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
     hd_agg["hotel_book_rate_by_dest"] = (
         (hd_agg["sum"] + m * global_book_rate) / (hd_agg["count"] + m)
@@ -128,7 +128,7 @@ def build_svd_features(
     )
     full_df["hotel_book_rate_by_dest"] = full_df["hotel_book_rate_by_dest"].fillna(global_book_rate)
 
-    # --- Step 9: Cast to float32 ---
+    # Cast the new columns to float32
     svd_columns = dest_cols + hotel_cols + [
         "svd_affinity_score",
         "hotel_book_rate_by_site",

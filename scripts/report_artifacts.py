@@ -1,13 +1,10 @@
 """
-Generate report artifacts: bias re-run on Supernova, booking-by-star plot, feature importance plot.
+Re-run the bias analysis on the Supernova validation predictions and draw two figures.
 
-Run from project root:
-    python scripts/report_artifacts.py
+Run from the project root with `python scripts/report_artifacts.py`.
 
-Outputs:
-    report/images/booking_rate_by_star.png
-    report/images/feature_importance_top20.png
-    stdout: updated bias numbers for the report
+Writes docs/figures/booking_rate_by_star.png and docs/figures/feature_importance.png,
+and prints the bias numbers to stdout.
 """
 import sys
 from pathlib import Path
@@ -31,12 +28,12 @@ from src.utils import (
     train_val_split,
 )
 
-IMG_DIR = ROOT / "report" / "images"
-IMG_DIR.mkdir(parents=True, exist_ok=True)
+FIG_DIR = ROOT / "docs" / "figures"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 RANDOM_STATE = 42
 
-# ── helpers ──────────────────────────────────────────────────────────────
+# Helpers
 
 def recall_at_k(df, score_col, k=5):
     """Fraction of positive-relevance items placed in top-k."""
@@ -64,7 +61,7 @@ def segment_ndcg_and_recall(df, score_col, segment_col):
     return results
 
 
-# ── PART 1: Bias re-run on Supernova validation predictions ─────────────
+# Part 1: bias re-run on the Supernova validation predictions
 
 print("=" * 70)
 print("PART 1: Bias analysis on Supernova validation predictions")
@@ -151,19 +148,19 @@ if HAS_PREDICTIONS:
     del pred_df
     gc.collect()
 else:
-    print("\nFor the report, use these detection numbers from the Supernova JSON:")
+    print("\nDetection numbers from the Supernova validation JSON:")
     print(f"  domestic NDCG@5:      {seg_diag.get('is_domestic=1', 'N/A'):.4f}")
     print(f"  international NDCG@5: {seg_diag.get('is_domestic=0', 'N/A'):.4f}")
     print(f"  family NDCG@5:        {seg_diag.get('is_family=1', 'N/A'):.4f}")
     print(f"  non-family NDCG@5:    {seg_diag.get('is_family=0', 'N/A'):.4f}")
-    print("\nFor mitigation: explain that a constant +0.02 boost to all international")
-    print("hotels in a search does not change within-search rankings when all candidates")
-    print("in that search are international. Only mixed-country searches are affected,")
-    print("and those are rare. The boost is therefore structurally ineffective.")
-    print("\nTo get exact mitigation numbers, re-run with the validation parquet.")
+    print("\nA constant +0.02 boost to all international hotels in a search does not")
+    print("change the within-search ranking when every candidate in that search is")
+    print("international. Only mixed-country searches are affected, and those are rare,")
+    print("so the boost cannot close the gap.")
+    print("\nExact mitigation numbers need the validation predictions parquet.")
 
 
-# ── PART 2: Booking rate by star rating plot ─────────────────────────────
+# Part 2: booking rate by star rating plot
 
 print("\n" + "=" * 70)
 print("PART 2: Booking rate by star rating plot")
@@ -198,13 +195,13 @@ ax.set_xticklabels([f"{s}" if s > 0 else "0\n(unknown)" for s in x], fontsize=8)
 ax.legend(fontsize=8)
 ax.set_title("Booking and click rates by star rating", fontsize=10)
 fig.tight_layout()
-out_path = IMG_DIR / "booking_rate_by_star.png"
+out_path = FIG_DIR / "booking_rate_by_star.png"
 fig.savefig(out_path, dpi=200)
 plt.close(fig)
 print(f"Saved {out_path}")
 
 
-# ── PART 3: Feature importance plot ──────────────────────────────────────
+# Part 3: feature importance plot
 
 print("\n" + "=" * 70)
 print("PART 3: Feature importance (top 20) from quick RankXENDCG")
@@ -287,7 +284,7 @@ ax.set_yticklabels(names, fontsize=7)
 ax.set_xlabel("Importance (gain)", fontsize=9)
 ax.set_title("Top 20 features by LightGBM gain", fontsize=10)
 fig.tight_layout()
-out_path = IMG_DIR / "feature_importance_top20.png"
+out_path = FIG_DIR / "feature_importance.png"
 fig.savefig(out_path, dpi=200)
 plt.close(fig)
 print(f"Saved {out_path}")
@@ -296,6 +293,5 @@ del model, train_set, X, y, groups, sorted_df, train_feat, train_df
 gc.collect()
 
 print("\n" + "=" * 70)
-print("DONE. Check report/images/ for the new PNGs.")
-print("Copy the bias numbers from PART 1 into the report.")
+print("Done. Figures written to docs/figures/.")
 print("=" * 70)

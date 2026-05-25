@@ -10,10 +10,10 @@ def build_position_features(
     Compute position-debiased hotel quality features from unbiased
     training-fold rows and merge them onto full_df.
 
-    Leakage-safe: only train_fold_df rows with random_bool=1 are used,
-    so validation targets never leak into features.
+    Only train_fold_df rows with random_bool=1 are used, so validation targets
+    never reach the features.
 
-    Returns full_df with 8 new columns:
+    Returns full_df with these new columns, one per line below.
       - hotel_ctr_unbiased
       - hotel_book_rate_unbiased
       - hotel_appearance_count
@@ -21,20 +21,20 @@ def build_position_features(
       - dest_hotel_affinity
       - country_pair_affinity
       - country_pair_click_rate
-      All target-derived rates use Bayesian smoothing (m=30) to reduce noise
+      All target-derived rates use Bayesian smoothing (m=30) to damp noise
       from low-count groups.
     """
     full_df = full_df.copy()
 
-    # Only use randomly-displayed rows from the training fold
+    # Use only randomly ordered rows from the training fold
     random_train = train_fold_df[train_fold_df["random_bool"] == 1]
 
-    # Global fallback rates (from unbiased training data)
+    # Global fallback rates from the unbiased training rows
     global_ctr = random_train["click_bool"].mean()
     global_book_rate = random_train["booking_bool"].mean()
-    m = 30  # Bayesian smoothing prior
+    m = 30  # smoothing strength
 
-    # --- Per-hotel click and booking rates (Bayesian smoothed) ---
+    # Per-hotel click and booking rates
     hotel_agg = (
         random_train.groupby("prop_id")
         .agg(
@@ -51,7 +51,7 @@ def build_position_features(
     ).astype("float32")
     hotel_agg["hotel_appearance_count"] = hotel_agg["hotel_appearance_count"].astype("int32")
 
-    # Keep only the output columns for merging
+    # Keep only the output columns for the merge
     hotel_stats = hotel_agg[["hotel_ctr_unbiased", "hotel_book_rate_unbiased", "hotel_appearance_count"]]
 
     full_df = full_df.merge(hotel_stats, on="prop_id", how="left")
@@ -65,7 +65,7 @@ def build_position_features(
         full_df["hotel_appearance_count"].fillna(0).astype("int32")
     )
 
-    # --- Per-destination booking rate (Bayesian smoothed) ---
+    # Per-destination booking rate
     dest_agg = random_train.groupby("srch_destination_id")["booking_bool"].agg(["sum", "count"])
     dest_agg["dest_book_rate"] = (
         (dest_agg["sum"] + m * global_book_rate) / (dest_agg["count"] + m)
@@ -76,7 +76,7 @@ def build_position_features(
         full_df["dest_book_rate"].fillna(global_book_rate).astype("float32")
     )
 
-    # --- Per-(destination, hotel) affinity (Bayesian smoothed) ---
+    # Per (destination, hotel) affinity
     dh_agg = random_train.groupby(["srch_destination_id", "prop_id"])["booking_bool"].agg(["sum", "count"]).reset_index()
     dh_agg["dest_hotel_affinity"] = (
         (dh_agg["sum"] + m * global_book_rate) / (dh_agg["count"] + m)
@@ -89,7 +89,7 @@ def build_position_features(
         full_df["dest_hotel_affinity"].fillna(global_book_rate).astype("float32")
     )
 
-    # --- Per-(visitor_country, prop_country) affinity (Bayesian smoothed) ---
+    # Per (visitor country, hotel country) affinity
     cp_agg = random_train.groupby(
         ["visitor_location_country_id", "prop_country_id"]
     )["booking_bool"].agg(["sum", "count"]).reset_index()
@@ -108,7 +108,7 @@ def build_position_features(
         full_df["country_pair_affinity"].fillna(global_book_rate).astype("float32")
     )
 
-    # --- Per-(visitor_country, prop_country) click rate (Bayesian smoothed) ---
+    # Per (visitor country, hotel country) click rate
     cpc_agg = random_train.groupby(
         ["visitor_location_country_id", "prop_country_id"]
     )["click_bool"].agg(["sum", "count"]).reset_index()

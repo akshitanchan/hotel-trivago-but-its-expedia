@@ -61,7 +61,7 @@ def add_price_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def add_competitor_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate the 8 competitor rate/inv/diff columns into summary features."""
+    """Aggregate the eight competitors' rate, inventory and price difference columns into summary features."""
     comp_rate_cols = [f"comp{i}_rate" for i in range(1, 9)]
     comp_inv_cols = [f"comp{i}_inv" for i in range(1, 9)]
     comp_diff_cols = [f"comp{i}_rate_percent_diff" for i in range(1, 9)]
@@ -78,7 +78,7 @@ def add_competitor_features(df: pd.DataFrame) -> pd.DataFrame:
     df["comp_avg_diff"] = diffs.mean(axis=1).astype("float32")
     df["comp_max_diff"] = diffs.max(axis=1).astype("float32")
  
-    # Fraction of competitors where Expedia is cheaper (0 if no data)
+    # Fraction of competitors Expedia undercuts (0 when there is no data)
     df["comp_cheaper_frac"] = (
         df["comp_cheaper_count"] / df["comp_data_count"].replace(0, np.nan)
     ).fillna(0).astype("float32")
@@ -112,7 +112,7 @@ def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     df["hour"] = dt.dt.hour.astype("int8")
     df["is_weekend_search"] = (dt.dt.dayofweek >= 5).astype("int8")
  
-    # Booking window buckets (ordinal-encoded for tree models)
+    # Booking window buckets, ordinal-encoded
     df["booking_window_bucket"] = pd.cut(
         df["srch_booking_window"],
         bins=[-1, 0, 1, 7, 14, 30, 90, 365, 9999],
@@ -125,9 +125,9 @@ def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
 def add_liu_count_features(df: pd.DataFrame) -> pd.DataFrame:
     """Count and interaction features from Liu et al. (2013).
  
-    These do NOT use target variables, so they are safe to compute globally.
+    None of these use target columns, so they can be computed on the full frame.
     """
-    # Location score interaction: score2 * score1 (if score2 is available)
+    # Product of the two location scores (score2 filled with 0)
     df["score2ma"] = (
         df["prop_location_score2"].fillna(0) * df["prop_location_score1"]
     ).astype("float32")
@@ -137,7 +137,7 @@ def add_liu_count_features(df: pd.DataFrame) -> pd.DataFrame:
         df["prop_location_score1"] / (df["prop_location_score2"].fillna(0) + 1)
     ).astype("float32")
 
-    # Liu et al. formulas (kept alongside existing variants — let the model decide)
+    # Liu et al. formulas, kept alongside the variants above
     df["score1d2_liu"] = (
         (df["prop_location_score2"].fillna(0) + 0.0001)
         / (df["prop_location_score1"] + 0.0001)
@@ -147,11 +147,11 @@ def add_liu_count_features(df: pd.DataFrame) -> pd.DataFrame:
         df["prop_location_score2"].fillna(0) * df["srch_query_affinity_score"].fillna(0)
     ).astype("float32")
 
-    # How often this hotel appears in the dataset (popularity proxy)
+    # Hotel appearance count as a popularity proxy
     prop_counts = df["prop_id"].map(df["prop_id"].value_counts())
     df["prop_id_count"] = prop_counts.astype("int32")
  
-    # How often this destination appears
+    # Destination appearance count
     dest_counts = df["srch_destination_id"].map(df["srch_destination_id"].value_counts())
     df["dest_id_count"] = dest_counts.astype("int32")
  
@@ -170,11 +170,11 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def impute_score2(df: pd.DataFrame, train_df: pd.DataFrame) -> pd.DataFrame:
-    """Impute missing prop_location_score2 with Q1 by prop_country_id.
+    """Impute missing prop_location_score2 with the first quartile by prop_country_id.
 
-    Fill values computed from train_df only (leakage-safe).
-    The prop_location_score2_missing indicator is NOT removed — the tree
-    can still split on it independently.
+    Fill values come from train_df only, so no validation or test rows leak in.
+    The prop_location_score2_missing indicator is kept so the trees can still
+    split on it.
     """
     col = "prop_location_score2"
     fill_map = train_df.groupby("prop_country_id")[col].quantile(0.25)
