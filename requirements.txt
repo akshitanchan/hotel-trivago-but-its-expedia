@@ -1,0 +1,12 @@
+# Dependencies for the notebooks, scripts and tests
+numpy
+pandas
+pyarrow
+scipy
+scikit-learn
+lightgbm
+catboost
+matplotlib
+seaborn
+jupyter
+pytest
